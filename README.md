@@ -1,5 +1,19 @@
 # React + Vite
 
+## Deploy
+
+Run the following command with an optional commit message:
+
+```bash
+npm run push -- "Describe your change"
+```
+
+The script runs lint and build, commits the changes, and pushes the current branch to GitHub. Pushes to `main` automatically deploy through GitHub Pages using `.github/workflows/deploy.yml`.
+
+In the repository settings, open **Pages** and set **Source** to **GitHub Actions** once. The deployed site will be available at:
+
+`https://salahuddinjony.github.io/SEU_frontEnd/`
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
