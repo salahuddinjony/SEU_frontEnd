@@ -39,7 +39,9 @@ function printRegistrations(items, reportTitle) {
   printWindow.addEventListener('load', () => { printWindow.print(); printWindow.close() }, { once: true })
 }
 function ProfileAvatar({ user }) { const image = profileImageOf(user); return <div className="user-avatar small profile-table-avatar" style={image ? { backgroundImage: `url(${image})` } : {}}>{!image && initials(user)}</div> }
-const go = (path) => { window.history.pushState({}, '', path); window.dispatchEvent(new PopStateEvent('popstate')) }
+const appBase = import.meta.env.BASE_URL.replace(/\/$/, '')
+const routePath = (pathname) => { const path = pathname.startsWith(appBase) ? pathname.slice(appBase.length) : pathname; return path || '/' }
+const go = (path) => { window.history.pushState({}, '', `${appBase}${path}`); window.dispatchEvent(new PopStateEvent('popstate')) }
 const registrationCache = { ids: null, promise: null }
 const loadRegisteredEventIds = async () => {
   if (registrationCache.ids) return registrationCache.ids
@@ -85,10 +87,10 @@ const clearSavedEventCache = () => {
 }
 
 function App() {
-  const [path, setPath] = useState(window.location.pathname || '/login')
+  const [path, setPath] = useState(routePath(window.location.pathname))
   const [session, setSession] = useState(null)
   const [restoring, setRestoring] = useState(!path.startsWith('/login') && !path.startsWith('/register'))
-  useEffect(() => { const onPop = () => setPath(window.location.pathname); window.addEventListener('popstate', onPop); return () => window.removeEventListener('popstate', onPop) }, [])
+  useEffect(() => { const onPop = () => setPath(routePath(window.location.pathname)); window.addEventListener('popstate', onPop); return () => window.removeEventListener('popstate', onPop) }, [])
   const restored = useRef(false)
   useEffect(() => { if (restored.current) return; restored.current = true; if (path === '/login' || path === '/register') { setRestoring(false); return } if (!authApi.restore()) { setRestoring(false); go('/login'); return } const saved = authApi.savedSession(); if (saved?.role) { setSession(saved); setRestoring(false); authApi.profile().then((payload) => setSession({ ...saved, ...getOne(payload) })).catch(() => {}) } else { authApi.profile().then((payload) => setSession(getOne(payload))).catch(() => { authApi.logout(); setSession(null); setRestoring(false); go('/login') }).finally(() => setRestoring(false)) } }, [])
   if (restoring) return <Loading />
