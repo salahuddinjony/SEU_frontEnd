@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      const base = '/SEU_frontEnd/'
-      const route = window.location.pathname.startsWith(base) ? window.location.pathname.slice(base.length) : window.location.pathname.slice(1)
+      const base = '/'
+      const route = window.location.pathname.slice(1)
       window.location.replace(`${base}?/${route}${window.location.search}${window.location.hash}`)
     </script>
   </head>
