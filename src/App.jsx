@@ -31,12 +31,15 @@ const profileImageOf = (user) => user?.profileImage || user?.profilePicture || u
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]))
 function printRegistrations(items, reportTitle) {
   const printWindow = window.open('', '_blank', 'width=900,height=700')
-  if (!printWindow) return
+  if (!printWindow) {
+    window.alert('Printing was blocked. Please allow pop-ups for this site and try again.')
+    return
+  }
   const rows = items.map((item) => { const user = item.user || item; return `<tr><td>${escapeHtml(nameOf(user))}</td><td>${escapeHtml(user.email || 'Email unavailable')}</td><td>${escapeHtml(item.event?.title || item.eventTitle || 'Event')}</td><td>${escapeHtml(dateLabel(item.createdAt || item.registeredAt))}</td></tr>` }).join('')
   printWindow.document.write(`<!doctype html><html><head><title>${escapeHtml(reportTitle)} registrations</title><style>body{margin:0;padding:36px;color:#18232b;font:12px Arial,sans-serif}header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px}h1{margin:7px 0 0;font:700 30px Georgia,serif}header strong{display:block;font-size:26px;text-align:right}header span{color:#64717a;font-size:11px}table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:1px solid #d9dee2;text-align:left}th{color:#64717a;font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:#f5f7f8}</style></head><body><header><div><span>Gather / Registration report</span><h1>${escapeHtml(reportTitle)}</h1></div><div><strong>${items.length}</strong><span>registrations</span></div></header><table><thead><tr><th>Guest</th><th>Email</th><th>Event</th><th>Registered</th></tr></thead><tbody>${rows}</tbody></table></body></html>`)
   printWindow.document.close()
-  printWindow.focus()
-  printWindow.addEventListener('load', () => { printWindow.print(); printWindow.close() }, { once: true })
+  printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true })
+  window.setTimeout(() => { if (!printWindow.closed) { printWindow.focus(); printWindow.print() } }, 250)
 }
 function ProfileAvatar({ user }) { const image = profileImageOf(user); return <div className="user-avatar small profile-table-avatar" style={image ? { backgroundImage: `url(${image})` } : {}}>{!image && initials(user)}</div> }
 const appBase = import.meta.env.BASE_URL.replace(/\/$/, '')
